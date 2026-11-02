@@ -28,7 +28,7 @@ Frontend and backend depend on the private `@composelens/shared` package through
 
 Within the frontend domain, `analysis-query-params.ts` handles shared input URLs, `display-formatters.ts` handles display strings and `safe-external-url.ts` validates external links. Browser services use `github-file-client.ts` and `image-api-client.ts`; `build-image-resolver.ts` connects repository file reads to the Dockerfile base resolver.
 
-Build UI assets into `frontend/dist/`. Cloudflare uses `backend/` as its project root and serves that SPA output with `backend/functions/` in one Pages project. The source and package separation preserves the approved visual layout and API behavior.
+Build UI assets into `frontend/dist/` for local development and Docker. Cloudflare uses `backend/` as its project root and serves the Pages-specific SPA output from `backend/dist/pages/` with `backend/functions/` in one Pages project. The source and package separation preserves the approved visual layout and API behavior.
 
 The Docker Compose deployment under `deployment/` builds those same UI assets into an Nginx image. Same-origin `/api` requests are proxied to a private Node.js backend container that reuses the Pages API handlers. Container deployment does not change the UI flow or public endpoints.
 

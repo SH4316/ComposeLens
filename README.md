@@ -95,7 +95,7 @@ backend/
     _lib/            # Docker Hub·Scout 조회 및 응답 정리
   server/            # Docker용 Node.js HTTP 서버
   Dockerfile         # 번들된 백엔드 실행 이미지
-  dist/              # Functions·Node 번들 출력
+  dist/              # Functions·Node 번들, pages/에 Pages용 SPA 출력
 shared/
   package.json       # 비공개 @composelens/shared 패키지
   package-lock.json

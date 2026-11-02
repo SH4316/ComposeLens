@@ -14,7 +14,7 @@ The user-approved source structure has independent `frontend/`, `backend/` and `
 
 Frontend and backend use the private pure-TypeScript `@composelens/shared` package through `file:../shared` for API types and image-reference parsing. Server code does not import frontend implementation. UI-only contracts (`analysis-types.ts`), Compose and Dockerfile parsing (`compose-parser.ts`, `dockerfile-base-resolver.ts`) and finding relationships (`image-vulnerability-graph.ts`) remain in `frontend/src/domain/`.
 
-Vite builds the SPA into `frontend/dist/`. Cloudflare uses `backend/` as its project root and deploys its Functions with the SPA from `../frontend/dist` in the same Pages project. Package separation preserves the public API and user workflow.
+Vite builds the SPA into `frontend/dist/` for local development and Docker. Cloudflare uses `backend/` as its project root; `npm run build:pages` builds the SPA into `backend/dist/pages/` so the output stays inside that root, alongside the project's Functions. Package separation preserves the public API and user workflow.
 
 Docker Compose is an additional deployment path in `deployment/compose.yml`. A multi-stage frontend image builds React and serves it through Nginx; Nginx routes `/api` requests to a private Node.js backend container. The Node HTTP entrypoint and Pages Functions share the same API handlers. Runtime images pin current official versions by digest, and the Node runtime omits package managers.
 

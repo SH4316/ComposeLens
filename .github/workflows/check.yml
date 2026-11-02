@@ -43,6 +43,27 @@ jobs:
         working-directory: ${{ matrix.package }}
         run: npm run build
 
+      - name: Build and validate Pages output
+        if: matrix.package == 'backend'
+        working-directory: backend
+        run: |
+          npm run build:pages
+          ./node_modules/.bin/wrangler pages functions build-env --project-dir . --outfile dist/pages-build-config.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { access, readFile } from 'node:fs/promises';
+          import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+
+          const config = JSON.parse(await readFile('dist/pages-build-config.json', 'utf8'));
+          const output = resolve(config.pages_build_output_dir);
+          const pathFromRoot = relative(process.cwd(), output);
+          assert(pathFromRoot && !isAbsolute(pathFromRoot) && !pathFromRoot.split(sep).includes('..'),
+            'Pages output must stay inside the backend project root');
+          await access(join(output, 'index.html'));
+          const routes = JSON.parse(await readFile(join(output, '_routes.json'), 'utf8'));
+          assert(routes.include.includes('/api/*'), 'Pages must route API requests to Functions');
+          NODE
+
   containers:
     runs-on: ubuntu-latest
     timeout-minutes: 15

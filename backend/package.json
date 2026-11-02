@@ -4,8 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "wrangler pages dev --port 8788",
+    "dev": "wrangler pages dev ../frontend/dist --port 8788",
     "build": "tsc --noEmit && wrangler pages functions build functions --outdir dist",
+    "build:pages": "npm --prefix ../frontend ci && npm --prefix ../frontend run build -- --outDir ../backend/dist/pages",
     "build:node": "tsc --noEmit && esbuild server/index.ts --bundle --platform=node --format=esm --target=node24 --outfile=dist/server.mjs",
     "start": "node dist/server.mjs",
     "check": "tsc --noEmit && vitest run",

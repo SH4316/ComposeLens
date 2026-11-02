@@ -126,20 +126,22 @@ Cloudflare 계정에서 최초 한 번 GitHub 저장소 접근을 연결해야 �
 | 프로젝트 이름 | `composelens` |
 | Production branch | `main` |
 | Root directory | `backend` |
-| Build command | `npm --prefix ../frontend ci && npm --prefix ../frontend run build` |
-| Build output directory | `../frontend/dist` |
-| Node.js 설정 | 빌드 환경변수 `NODE_VERSION=24` |
+| Build command | `npm run build:pages` |
+| Build output directory | `dist/pages` (`wrangler.jsonc`에서 지정) |
+| Node.js 설정 | `backend/.node-version`의 `24` (환경변수로 지정한다면 `NODE_VERSION=24`) |
 
-Cloudflare는 프로젝트 루트인 `backend/`의 의존성을 설치하고 `backend/functions/`를 번들합니다. 빌드 명령은 프런트엔드 의존성을 설치한 뒤 SPA를 만듭니다. `shared/`는 로컬 `file:` 의존성으로 연결된 순수 TypeScript 패키지이므로 production 빌드에 공통 패키지의 개발 의존성을 별도로 설치할 필요는 없습니다.
+Cloudflare는 프로젝트 루트인 `backend/`의 의존성을 설치하고 `backend/functions/`를 번들합니다. `build:pages`는 프런트엔드 의존성을 설치한 뒤 SPA를 `backend/dist/pages/`에 만듭니다. `shared/`는 로컬 `file:` 의존성으로 연결된 순수 TypeScript 패키지이므로 production 빌드에 공통 패키지의 개발 의존성을 별도로 설치할 필요는 없습니다.
+
+기존 프로젝트라면 대시보드의 Build command도 `npm run build:pages`로 바꾸세요. 출력 경로는 Wrangler 설정이 적용하며 대시보드에서 편집할 필요가 없습니다. 기존 `../frontend/dist` 설정은 Pages 프로젝트 루트 밖으로 나가 `build output directory is outside of the repository` 오류를 일으킵니다. Node 버전을 별도 환경변수로 고정했다면 production·preview 모두 `24`로 맞추세요. [Wrangler 설정 우선순위](https://developers.cloudflare.com/pages/functions/wrangler-configuration/#source-of-truth), [빌드 Node 버전 지정](https://developers.cloudflare.com/pages/configuration/build-image/)
 
 이후 `main`에 push하면 Pages가 SPA와 Functions를 같은 프로젝트에 함께 배포합니다. [Git 연동 안내](https://developers.cloudflare.com/pages/get-started/git-integration/), [Functions 배포 안내](https://developers.cloudflare.com/pages/functions/get-started/)
 
 ### 빌드 출력과 라우팅
 
-Vite는 `frontend/dist/`에 SPA를 만듭니다. 백엔드의 `build`는 `backend/dist/`에 Functions를 컴파일해 검증하는 명령입니다. Pages의 정적 파일 출력 경로는 `frontend/dist/`를 가리킵니다.
+일반 Vite 빌드는 `frontend/dist/`에 SPA를 만듭니다. Docker와 로컬 개발은 이 경로를 계속 사용하며, `backend`의 `dev` 명령도 해당 경로를 명시합니다. Pages 전용 `npm --prefix backend run build:pages`는 출력 경로만 `backend/dist/pages/`로 바꿉니다. 백엔드의 `build`는 `backend/dist/`에 Functions를 컴파일해 검증하는 별도 명령입니다.
 
-`backend/wrangler.jsonc`는 프로젝트명·SPA 출력 위치(`../frontend/dist`)·런타임 호환 날짜를 선언합니다. `frontend/public/_routes.json`은 Vite 빌드 시 `frontend/dist/`로 복사되며 `/api/*`에만 Functions를 적용합니다. 정적 페이지·자산은 Pages에서 제공합니다. 런타임 API 키나 Secret 바인딩을 추가할 필요가 없습니다.
+`backend/wrangler.jsonc`는 프로젝트명·SPA 출력 위치(`./dist/pages`)·런타임 호환 날짜를 선언합니다. Pages 정적 출력에는 SPA 파일만 포함되며, 같은 `backend/dist/`의 Functions·Node 번들은 포함되지 않습니다. `frontend/public/_routes.json`은 Vite 빌드 시 정적 출력으로 복사되며 `/api/*`에만 Functions를 적용합니다. 정적 페이지·자산은 Pages에서 제공합니다. 런타임 API 키나 Secret 바인딩을 추가할 필요가 없습니다.
 
-GitHub의 `Check` 워크플로는 push·PR에서 세 패키지를 독립적으로 설치하고 타입·단위 테스트·빌드를 검증합니다. Cloudflare Git 연동 배포는 별도 작업이므로 이 워크플로의 성공을 자동 배포 조건으로 가정하지 않습니다.
+GitHub의 `Check` 워크플로는 push·PR에서 세 패키지를 독립적으로 설치하고 타입·단위 테스트·빌드를 검증합니다. Pages 전용 빌드도 실행해 Wrangler의 출력 경로가 `backend/` 안에 있고 SPA·API 라우팅 파일이 생성됐는지 확인합니다. Cloudflare Git 연동 배포는 별도 작업이므로 이 워크플로의 성공을 자동 배포 조건으로 가정하지 않습니다.
 
 최초 배포 후 Preview 또는 production URL에서 Compose 조회, 이미지 정보, CVE 상세, 태그 변경을 확인하세요. 배포 URL은 Cloudflare가 실제 생성한 값을 사용합니다.
