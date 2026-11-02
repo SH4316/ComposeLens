@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import type { Finding, ImageReport } from '../shared/types';
+import type { Finding, ImageReport } from '@composelens/shared';
 
 const DIGEST = `sha256:${'a'.repeat(64)}`;
 const COMPOSE = 'services:\n  web:\n    image: nginx:latest\n  cache:\n    image: redis:7.4\n';

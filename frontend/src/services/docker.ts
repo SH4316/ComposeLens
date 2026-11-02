@@ -1,4 +1,4 @@
-import type { ImageReport, TagPage } from '../../../shared/types';
+import type { ImageReport, TagPage } from '@composelens/shared';
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(path, { signal });

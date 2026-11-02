@@ -1,5 +1,5 @@
 import { ListFilter, Search, X } from 'lucide-react';
-import { SEVERITIES, type Severity } from '../../../shared/types';
+import { SEVERITIES, type Severity } from '@composelens/shared';
 import type { Filters } from '../domain/types';
 import { SEVERITY_LABELS } from './SeverityBadge';
 

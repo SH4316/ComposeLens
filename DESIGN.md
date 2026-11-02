@@ -16,7 +16,11 @@ Operate: a desktop dependency inspector. The user's specified topology is the au
 
 ## Implementation boundaries
 
-Keep components, hooks, browser services and UI domain state under `frontend/src/`. API handlers and Docker adapters remain in the root `functions/` directory. Both layers consume API contracts and image-reference parsing from `shared/`; neither imports the other layer's implementation. Visual state and relation-building types stay with the frontend.
+Keep components, hooks, browser services and UI domain state under `frontend/src/`. API handlers and Docker adapters live under `backend/functions/`. Each of `frontend/`, `backend/` and `shared/` owns its package manifest, lockfile, TypeScript and test configuration; the repository root has no Node package.
+
+Frontend and backend depend on the private `@composelens/shared` package through `file:../shared`. It contains pure TypeScript API contracts and image-reference parsing. Neither layer imports the other layer's implementation. Visual state, Compose parsing and relation-building types stay with the frontend.
+
+Build UI assets into `frontend/dist/`. Cloudflare uses `backend/` as its project root and serves that SPA output with `backend/functions/` in one Pages project. The source and package separation preserves the approved visual layout and API behavior.
 
 ## Visual system
 

@@ -1,4 +1,4 @@
-import { SEVERITIES, type Finding, type ImageMetadata, type ParsedImageReference, type Severity } from '../../shared/types';
+import { SEVERITIES, type Finding, type ImageMetadata, type ParsedImageReference, type Severity } from '@composelens/shared';
 import { ApiError } from './http';
 import { repositoryUrl } from './hub';
 import { findPlatform, isDigest, platformName, type ImagePlatform } from './platform';

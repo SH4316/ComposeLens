@@ -1,5 +1,5 @@
-import { parseImageReference } from '../../../shared/image-reference';
-import { SEVERITIES, type Finding, type Severity } from '../../../shared/types';
+import { parseImageReference } from '@composelens/shared/image-reference';
+import { SEVERITIES, type Finding, type Severity } from '@composelens/shared';
 import type {
   Filters,
   ImageState,

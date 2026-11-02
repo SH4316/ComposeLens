@@ -1,6 +1,6 @@
 import { Box, Check, ChevronDown, CircleAlert, Link2, LoaderCircle, RotateCcw } from 'lucide-react';
 import { formatBytes, shortDigest } from '../domain/format';
-import { parseImageReference } from '../../../shared/image-reference';
+import { parseImageReference } from '@composelens/shared/image-reference';
 import type { ImageState } from '../domain/types';
 
 interface Props {

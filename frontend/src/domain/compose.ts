@@ -1,5 +1,5 @@
 import { parseDocument } from 'yaml';
-import { parseImageReference } from '../../../shared/image-reference';
+import { parseImageReference } from '@composelens/shared/image-reference';
 import type { ImageSpec, ParsedCompose } from './types';
 
 type Mapping = Record<string, unknown>;

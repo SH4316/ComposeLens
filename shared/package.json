@@ -1,0 +1,25 @@
+{
+  "name": "@composelens/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./types.ts",
+    "./image-reference": "./image-reference.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "tsc --noEmit && vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

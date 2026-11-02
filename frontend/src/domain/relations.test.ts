@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildGraph } from './relations';
-import type { Finding } from '../../../shared/types';
+import type { Finding } from '@composelens/shared';
 import type { Filters, ImageState } from './types';
 
 const defaultFilters: Filters = { search: '', severities: [], fix: 'all' };

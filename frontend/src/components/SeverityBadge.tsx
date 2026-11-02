@@ -1,4 +1,4 @@
-import type { Severity } from '../../../shared/types';
+import type { Severity } from '@composelens/shared';
 
 export const SEVERITY_LABELS: Record<Severity, string> = {
   CRITICAL: 'Critical', HIGH: 'High', MEDIUM: 'Medium', LOW: 'Low', UNKNOWN: 'Unknown',

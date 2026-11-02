@@ -1,4 +1,4 @@
-import type { Finding, ImageReport, Severity } from '../../../shared/types';
+import type { Finding, ImageReport, Severity } from '@composelens/shared';
 
 export interface ImageSpec {
   id: string;

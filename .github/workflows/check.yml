@@ -16,6 +16,10 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [frontend, backend, shared]
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -25,12 +29,16 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: ${{ matrix.package }}/package-lock.json
 
       - name: Install dependencies
+        working-directory: ${{ matrix.package }}
         run: npm ci
 
       - name: Check types and unit tests
+        working-directory: ${{ matrix.package }}
         run: npm run check
 
-      - name: Build application
+      - name: Build package
+        working-directory: ${{ matrix.package }}
         run: npm run build
