@@ -6,12 +6,17 @@ Operate: a desktop dependency inspector. The user's specified topology is the au
 
 ## Structure
 
+- UI implementation and assets live in `frontend/`; this source boundary does not change the approved screen layout or behavior.
 - Header: product identity, theme control and source link.
 - Input area: public GitHub repository and Compose path, with one clear analysis action.
 - Shared toolbar: search, severity and remediation filters, result counts and current lookup state.
 - Workspace: independently scrolling image and CVE lists separated by an SVG relationship layer.
 - Detail drawer: CVE description, source links and per-image package / installed / fixed version rows. Preserve the previous selection and scroll positions when it closes.
 - Narrow screens: stack the lists and retain explicit relationship labels. Do not require hover or a wide graph to read the findings.
+
+## Implementation boundaries
+
+Keep components, hooks, browser services and UI domain state under `frontend/src/`. API handlers and Docker adapters remain in the root `functions/` directory. Both layers consume API contracts and image-reference parsing from `shared/`; neither imports the other layer's implementation. Visual state and relation-building types stay with the frontend.
 
 ## Visual system
 

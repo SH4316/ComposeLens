@@ -14,5 +14,5 @@
     "noUnusedParameters": true,
     "types": ["vite/client", "@cloudflare/workers-types", "node"]
   },
-  "include": ["src", "functions", "vite.config.ts", "vitest.config.ts"]
+  "include": ["frontend/src", "functions", "shared", "vite.config.ts", "vitest.config.ts"]
 }

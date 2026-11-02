@@ -1,5 +1,5 @@
-import { parseImageReference } from '../../src/domain/image-reference';
-import type { ImageMetadata, ImageReport } from '../../src/domain/types';
+import { parseImageReference } from '../../shared/image-reference';
+import type { ImageMetadata, ImageReport } from '../../shared/types';
 import { ApiError } from './http';
 import { readTagMetadata, validateRepository } from './hub';
 import { validatePlatform } from './platform';

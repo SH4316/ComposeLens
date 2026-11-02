@@ -1,13 +1,11 @@
-import { parseImageReference } from './image-reference';
-import { SEVERITIES } from './types';
+import { parseImageReference } from '../../../shared/image-reference';
+import { SEVERITIES, type Finding, type Severity } from '../../../shared/types';
 import type {
   Filters,
-  Finding,
   ImageState,
   LinkedFinding,
   RelationEdge,
   RelationGraph,
-  Severity,
   VulnerabilityNode,
 } from './types';
 

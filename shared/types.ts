@@ -10,19 +10,6 @@ export interface ParsedImageReference {
   pinned: boolean;
 }
 
-export interface ImageSpec {
-  id: string;
-  services: string[];
-  declaredRef: string;
-  platform: string;
-  issue?: string;
-}
-
-export interface ParsedCompose {
-  images: ImageSpec[];
-  warnings: string[];
-}
-
 export interface ImageMetadata {
   repository: string;
   reference: string;
@@ -56,46 +43,6 @@ export interface ImageReport {
   retrievedAt: string;
 }
 
-export interface ImageState {
-  spec: ImageSpec;
-  selectedRef: string;
-  report: ImageReport | null;
-  status: 'idle' | 'loading' | 'done' | 'error';
-  error: string | null;
-}
-
-export interface LinkedFinding extends Finding {
-  imageId: string;
-  imageReference: string;
-  imageServices: string[];
-}
-
-export interface VulnerabilityNode {
-  id: string;
-  cve: string;
-  severity: Severity;
-  findings: LinkedFinding[];
-}
-
-export interface RelationEdge {
-  id: string;
-  imageId: string;
-  vulnerabilityId: string;
-  uncertain: boolean;
-}
-
-export interface RelationGraph {
-  images: ImageState[];
-  vulnerabilities: VulnerabilityNode[];
-  edges: RelationEdge[];
-}
-
-export interface Filters {
-  search: string;
-  severities: Severity[];
-  fix: 'all' | 'available' | 'unavailable';
-}
-
 export interface TagOption {
   name: string;
   digest: string;
@@ -105,13 +52,4 @@ export interface TagOption {
 export interface TagPage {
   tags: TagOption[];
   nextPage: number | null;
-}
-
-export interface RepositoryFile {
-  content: string;
-  repository: string;
-  branch: string;
-  path: string;
-  htmlUrl: string;
-  sha: string;
 }

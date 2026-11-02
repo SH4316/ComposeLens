@@ -30,6 +30,31 @@ React SPA ────────────────→ GitHub REST API: �
 
 브라우저에 넣을 비밀키나 Docker 계정은 필요하지 않습니다. 별도 이미지 스캔·DB 없이 익명으로 제공되는 기존 분석 정보를 사용합니다.
 
+## 디렉터리와 의존성
+
+```text
+frontend/
+  index.html
+  public/            # 정적 자산과 Pages 라우팅 설정
+  src/
+    components/      # 화면 컴포넌트
+    hooks/           # 화면 상태와 조회 흐름
+    domain/          # Compose 해석, 관계 구성, UI 전용 타입
+    services/        # 브라우저의 GitHub·앱 API 호출
+functions/
+  api/               # Cloudflare Pages API 엔드포인트
+  _lib/              # Docker Hub·Scout 조회 및 응답 정리
+shared/
+  types.ts           # 양쪽이 공유하는 API 계약
+  image-reference.ts # 공통 이미지 참조 해석
+package.json         # 전체 프로젝트의 스크립트와 의존성
+package-lock.json
+```
+
+프런트엔드와 Functions는 서로의 구현을 import하지 않습니다. 양쪽이 함께 사용하는 API 타입과 이미지 참조 해석은 `shared/`에서 가져오며, Compose·관계도·화면 상태 타입은 프런트엔드 안에 둡니다. 서버 코드가 프런트엔드 코드에 의존하지 않도록 경계를 유지합니다.
+
+의존성 설치와 모든 명령은 저장소 루트에서 실행합니다. Vite의 앱 루트는 `frontend/`, 빌드 출력은 저장소 루트의 `dist/`입니다. Cloudflare가 인식하는 `functions/`와 배포 설정은 저장소 루트에 유지합니다.
+
 ## 지원 범위
 
 - 공개 GitHub 저장소의 단일 Compose 파일을 지원합니다. YAML 앵커와 인라인 변수 기본값을 해석합니다.
@@ -88,7 +113,7 @@ Cloudflare 계정에서 최초 한 번 GitHub 저장소 접근을 연결해야 �
 
 이후 `main`에 push하면 Pages가 SPA와 루트의 `functions/` 코드를 함께 빌드·배포합니다. [Git 연동 안내](https://developers.cloudflare.com/pages/get-started/git-integration/), [Functions 배포 안내](https://developers.cloudflare.com/pages/functions/get-started/)
 
-`wrangler.jsonc`는 프로젝트명·빌드 출력·런타임 호환 날짜를 선언합니다. `public/_routes.json`은 Vite 빌드 시 `dist`로 복사되며 `/api/*`에만 Functions를 적용합니다. 정적 페이지·자산은 Pages에서 제공합니다. 런타임 API 키나 Secret 바인딩을 추가할 필요가 없습니다.
+`wrangler.jsonc`는 프로젝트명·빌드 출력·런타임 호환 날짜를 선언합니다. `frontend/public/_routes.json`은 Vite 빌드 시 `dist`로 복사되며 `/api/*`에만 Functions를 적용합니다. 정적 페이지·자산은 Pages에서 제공합니다. 런타임 API 키나 Secret 바인딩을 추가할 필요가 없습니다.
 
 GitHub의 `Check` 워크플로는 push·PR에서 타입·단위 테스트·빌드를 검증합니다. Cloudflare Git 연동 배포는 별도 작업이므로 이 워크플로의 성공을 자동 배포 조건으로 가정하지 않습니다.
 

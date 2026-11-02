@@ -1,4 +1,4 @@
-import type { ImageReport, TagPage } from '../domain/types';
+import type { ImageReport, TagPage } from '../../../shared/types';
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(path, { signal });

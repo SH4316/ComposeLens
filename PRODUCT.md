@@ -10,6 +10,8 @@ web
 
 User-approved React SPA, Vite, TypeScript, SVG connections, Cloudflare Pages with Pages Functions. GitHub integration deploys the source from SH4316/ComposeLens.
 
+The user-approved source structure separates `frontend/` from the root `functions/` directory. Common API types and image-reference parsing live in `shared/`; server code does not import frontend implementation. UI-only types, Compose parsing and graph construction remain in `frontend/src/domain/`. One root package manifest and lockfile manage the project. Vite builds from `frontend/` to the root `dist/`, while Cloudflare's project root remains the repository root.
+
 ## Users
 
 Developers inspecting Compose dependencies on a desktop while working.

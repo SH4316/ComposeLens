@@ -1,4 +1,4 @@
-import type { ImageMetadata, ParsedImageReference, TagPage } from '../../src/domain/types';
+import type { ImageMetadata, ParsedImageReference, TagPage } from '../../shared/types';
 import { ApiError } from './http';
 import { findPlatform, isDigest, platformName, type ImagePlatform } from './platform';
 import { requestJson } from './upstream';

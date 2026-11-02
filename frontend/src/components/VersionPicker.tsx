@@ -1,8 +1,9 @@
 import { ArrowRight, Check, CircleAlert, ExternalLink, LoaderCircle, Search, Tag } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { formatBytes, formatDate, safeExternalUrl, shortDigest } from '../domain/format';
-import { parseImageReference } from '../domain/image-reference';
-import type { ImageState, TagOption } from '../domain/types';
+import { parseImageReference } from '../../../shared/image-reference';
+import type { TagOption } from '../../../shared/types';
+import type { ImageState } from '../domain/types';
 import { fetchTags } from '../services/docker';
 import { Drawer } from './Drawer';
 

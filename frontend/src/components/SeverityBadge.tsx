@@ -1,4 +1,4 @@
-import type { Severity } from '../domain/types';
+import type { Severity } from '../../../shared/types';
 
 export const SEVERITY_LABELS: Record<Severity, string> = {
   CRITICAL: 'Critical', HIGH: 'High', MEDIUM: 'Medium', LOW: 'Low', UNKNOWN: 'Unknown',

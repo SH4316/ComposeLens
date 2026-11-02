@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildGraph } from './relations';
-import type { Filters, Finding, ImageState } from './types';
+import type { Finding } from '../../../shared/types';
+import type { Filters, ImageState } from './types';
 
 const defaultFilters: Filters = { search: '', severities: [], fix: 'all' };
 const digest = `sha256:${'a'.repeat(64)}`;
