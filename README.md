@@ -1,3 +1,7 @@
+<p>
+  <img src="frontend/public/composelens-logo-smile.png" width="320" alt="여러 레이어로 나뉜 컨테이너를 등에 실은 웃는 고래, ComposeLens 로고" />
+</p>
+
 # ComposeLens
 
 공개 GitHub 저장소의 Compose 파일을 읽고, 이미지와 공개 취약점 분석 결과를 연결해서 살펴보는 개발 도구입니다. 저장소 URL과 Compose 파일 경로를 입력하면 좌측에는 이미지, 우측에는 CVE 목록이 표시됩니다.

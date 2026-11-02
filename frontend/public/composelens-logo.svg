@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="400" viewBox="0 0 560 400" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">ComposeLens</title>
+  <desc id="description">A blue whale carrying two containers separated into floating horizontal layers.</desc>
+
+  <defs>
+    <g id="container-layer" stroke="#174eac" stroke-width="2.5" stroke-linejoin="round">
+      <path d="M0 0 52-20 132 0 80 20Z" fill="#bddbff" />
+      <path d="M0 0 80 20V36L0 16Z" fill="#75adf5" />
+      <path d="m80 20 52-20v16L80 36Z" fill="#4086e7" />
+      <path d="M16 5v10m16-6v10m16-6v10m16-6v10m33-16v10m17-17v10" stroke="#205fc1" stroke-width="2" stroke-linecap="round" />
+    </g>
+  </defs>
+
+  <!-- Separate slices keep the container image layers visible at logo sizes. -->
+  <g>
+    <use href="#container-layer" x="166" y="218" />
+    <use href="#container-layer" x="166" y="178" />
+    <use href="#container-layer" x="166" y="138" />
+    <use href="#container-layer" x="296" y="216" />
+    <use href="#container-layer" x="296" y="176" />
+    <use href="#container-layer" x="296" y="136" />
+    <use href="#container-layer" x="296" y="96" />
+  </g>
+
+  <!-- Raised flukes taper into a full, rounded whale body. -->
+  <path d="M173 253H443c22 0 35-7 48-5 15 3 23 15 22 31-3 45-81 81-198 83-87 2-149-23-179-65-14-20-23-41-28-63-25-1-44-19-51-47 23-4 42 6 50 24 8-18 23-30 43-33 2 21-7 37-26 44 6 21 21 31 49 31Z" fill="#205fd8" />
+  <!-- A swept-back pectoral fin stays distinct from the belly contour. -->
+  <path d="M307 290c-6 25-20 49-43 66-7-19-2-43 12-58 9-9 20-12 31-8Z" fill="#164ab5" />
+  <circle cx="475" cy="277" r="6" fill="#fff" />
+  <path d="M459 308c15 0 29-5 39-13" stroke="#164ab5" stroke-width="4" stroke-linecap="round" />
+</svg>
