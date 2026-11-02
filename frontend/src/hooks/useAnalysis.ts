@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { parseCompose } from '../domain/compose';
-import type { ImageSpec, ImageState, RepositoryFile } from '../domain/types';
-import { fetchImageReport } from '../services/docker';
-import { fetchComposeFile } from '../services/github';
+import { parseCompose } from '../domain/compose-parser';
+import type { ImageSpec, ImageState, RepositoryFile } from '../domain/analysis-types';
+import { fetchImageReport } from '../services/image-api-client';
+import { fetchComposeFile } from '../services/github-file-client';
+import { resolveBuildImages } from '../services/build-image-resolver';
 
 interface AnalysisState {
   source: RepositoryFile | null;
@@ -69,7 +70,7 @@ export function useAnalysis() {
     }
   }, []);
 
-  const analyze = useCallback(async (repositoryUrl: string, path: string) => {
+  const analyze = useCallback(async (repositoryUrl: string, path: string): Promise<boolean> => {
     cancel();
     const currentGeneration = ++generation.current;
     const controller = new AbortController();
@@ -78,8 +79,9 @@ export function useAnalysis() {
 
     try {
       const source = await fetchComposeFile(repositoryUrl, path, controller.signal);
-      if (controller.signal.aborted) return;
-      const parsed = parseCompose(source.content);
+      if (controller.signal.aborted) return false;
+      const parsed = await resolveBuildImages(parseCompose(source.content), source, controller.signal);
+      if (controller.signal.aborted || generation.current !== currentGeneration) return false;
       const images = parsed.images.map(initialImage);
       setState({ source, images, warnings: parsed.warnings, loadingFile: false, error: null });
 
@@ -93,9 +95,11 @@ export function useAnalysis() {
           await loadImage(image, currentGeneration);
         }
       }));
+      return !controller.signal.aborted && generation.current === currentGeneration;
     } catch (error) {
-      if (controller.signal.aborted || generation.current !== currentGeneration) return;
+      if (controller.signal.aborted || generation.current !== currentGeneration) return false;
       setState({ ...INITIAL_STATE, error: errorMessage(error) });
+      return false;
     }
   }, [cancel, loadImage]);
 

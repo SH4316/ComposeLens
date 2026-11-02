@@ -1,4 +1,23 @@
+/** Frontend models for Compose inputs, image analysis and CVE relationships. */
 import type { Finding, ImageReport, Severity } from '@composelens/shared';
+
+export interface BuildSpec {
+  context: string;
+  dockerfile: string;
+  dockerfileInline?: string;
+  target?: string;
+  args: Record<string, string | null>;
+  unresolvedArgs?: string[];
+  outputRef?: string;
+}
+
+export interface BuildOrigin {
+  dockerfile: string;
+  stage: string;
+  outputRef?: string;
+  baseRef: string;
+  source?: RepositoryFileLocation;
+}
 
 export interface ImageSpec {
   id: string;
@@ -6,6 +25,8 @@ export interface ImageSpec {
   declaredRef: string;
   platform: string;
   issue?: string;
+  build?: BuildSpec;
+  origin?: BuildOrigin;
 }
 
 export interface ParsedCompose {
@@ -25,6 +46,7 @@ export interface LinkedFinding extends Finding {
   imageId: string;
   imageReference: string;
   imageServices: string[];
+  imageOrigin?: BuildOrigin;
 }
 
 export interface VulnerabilityNode {
@@ -53,11 +75,20 @@ export interface Filters {
   fix: 'all' | 'available' | 'unavailable';
 }
 
+export interface RepositoryFileLocation {
+  repository: string;
+  ref: string;
+  path: string;
+}
+
 export interface RepositoryFile {
   content: string;
+  /** The selected superproject and logical checkout path, including submodule mounts. */
   repository: string;
   branch: string;
   path: string;
   htmlUrl: string;
   sha: string;
+  /** The actual file location when traversal crossed one or more submodules. */
+  resolvedLocation?: RepositoryFileLocation;
 }

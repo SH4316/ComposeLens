@@ -1,6 +1,6 @@
 import { ListFilter, Search, X } from 'lucide-react';
 import { SEVERITIES, type Severity } from '@composelens/shared';
-import type { Filters } from '../domain/types';
+import type { Filters } from '../domain/analysis-types';
 import { SEVERITY_LABELS } from './SeverityBadge';
 
 export const EMPTY_FILTERS: Filters = { search: '', severities: [], fix: 'all' };

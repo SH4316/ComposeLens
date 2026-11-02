@@ -1,3 +1,4 @@
+/** Fetches image reports and tags through the application API. */
 import type { ImageReport, TagPage } from '@composelens/shared';
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {

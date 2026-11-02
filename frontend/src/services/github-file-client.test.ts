@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchComposeFile } from './github';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { RepositoryFile } from '../domain/analysis-types';
+import { fetchComposeFile, fetchRepositoryFile } from './github-file-client';
 
 const source = 'services:\n  웹:\n    image: nginx:latest\n';
 
@@ -169,5 +170,62 @@ describe('fetchComposeFile', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json({}, 404)));
     await expect(fetchComposeFile('https://github.com/owner/repo', 'compose.yml')).rejects.toThrow('공개 GitHub 저장소');
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe('fetchRepositoryFile', () => {
+  let compose: RepositoryFile;
+  beforeEach(() => {
+    compose = {
+      content: source, repository: 'owner/repo', branch: 'feature/builds', path: 'deployment/compose.yml',
+      htmlUrl: 'https://github.com/owner/repo/blob/feature%2Fbuilds/deployment/compose.yml', sha: 'compose-sha',
+    };
+  });
+
+  it('fetches a file from the selected repository branch without another metadata request', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(json(file()));
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await fetchRepositoryFile(compose, 'frontend/Dockerfile');
+    expect(result).toMatchObject({ repository: 'owner/repo', branch: 'feature/builds', path: 'frontend/Dockerfile', content: source, sha: 'blob-sha' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe('https://api.github.com/repos/owner/repo/contents/frontend/Dockerfile?ref=feature%2Fbuilds');
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ credentials: 'omit', cache: 'no-store' });
+  });
+
+  it('encodes raw filenames exactly once, preserving literal percent sequences', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(json(file()));
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await fetchRepositoryFile(compose, 'docker/%2e%2e/Custom % Dockerfile');
+    expect(result.path).toBe('docker/%2e%2e/Custom % Dockerfile');
+    expect(fetchMock.mock.calls[0][0]).toContain('/contents/docker/%252e%252e/Custom%20%25%20Dockerfile?');
+  });
+
+  it.each(['../Dockerfile', '/Dockerfile', 'C:/Dockerfile', 'a/../Dockerfile', 'a/./Dockerfile', 'a//Dockerfile', 'a\\Dockerfile', ''])('rejects a non-normalized repository path before fetching: %s', async (path) => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(fetchRepositoryFile(compose, path)).rejects.toThrow('상대 파일 경로');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('names the missing Dockerfile rather than describing it as a Compose file', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json({}, 404)));
+    await expect(fetchRepositoryFile(compose, 'backend/Customfile')).rejects.toThrow('Dockerfile (backend/Customfile)을 찾을 수 없습니다');
+  });
+
+  it.each([
+    { type: 'dir' }, { type: 'symlink' }, { target: './other' }, { submodule_git_url: 'git://example.com/repo' },
+    { size: 1024 * 1024 + 1 }, { encoding: 'utf-8' }, { content: '/w==' },
+  ])('applies file type, 1MB, base64 and UTF-8 checks to Dockerfiles', async (invalid) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json(file(invalid))));
+    await expect(fetchRepositoryFile(compose, 'backend/Dockerfile')).rejects.toThrow('Dockerfile (backend/Dockerfile)');
+  });
+
+  it('propagates cancellation for additional repository file requests', async () => {
+    const controller = new AbortController();
+    vi.stubGlobal('fetch', vi.fn((_url: string, options: RequestInit) => pendingUntilAbort(options.signal!)));
+    const request = fetchRepositoryFile(compose, 'Dockerfile', controller.signal);
+    const rejection = expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    controller.abort();
+    await rejection;
   });
 });

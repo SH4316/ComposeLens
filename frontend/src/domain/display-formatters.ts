@@ -1,3 +1,4 @@
+/** Formats image metadata for display. */
 export function shortDigest(digest: string) {
   return `${digest.slice(0, 19)}…`;
 }
@@ -13,13 +14,4 @@ export function formatDate(value: string | null) {
   return Number.isNaN(date.getTime()) ? '시각 미제공' : new Intl.DateTimeFormat('ko-KR', {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   }).format(date);
-}
-
-export function safeExternalUrl(value: string): string | undefined {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined;
-  } catch {
-    return undefined;
-  }
 }
