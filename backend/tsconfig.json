@@ -12,5 +12,5 @@
     "noUnusedParameters": true,
     "types": ["@cloudflare/workers-types", "node"]
   },
-  "include": ["functions", "vitest.config.ts"]
+  "include": ["functions", "server", "vitest.config.ts"]
 }

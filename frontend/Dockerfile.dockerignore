@@ -1,0 +1,19 @@
+# Build from the repository root, sending only this service and its local package.
+**
+!frontend/
+!frontend/**
+!shared/
+!shared/**
+
+**/node_modules
+**/dist
+**/.git
+**/.wrangler
+**/.env
+**/.env.*
+**/coverage
+**/test-results
+**/playwright-report
+**/*.test.ts
+**/*.spec.ts
+frontend/tests

@@ -42,3 +42,30 @@ jobs:
       - name: Build package
         working-directory: ${{ matrix.package }}
         run: npm run build
+
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Validate Compose configuration
+        run: docker compose -f deployment/compose.yml config --quiet
+
+      - name: Build and start containers
+        run: docker compose -f deployment/compose.yml up --build --detach --wait --wait-timeout 120
+
+      - name: Verify static files and API routing
+        run: sh deployment/smoke-test.sh
+
+      - name: Verify DNS recovery without restarting Nginx
+        run: sh deployment/check-dns-recovery.sh
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose -f deployment/compose.yml logs --no-color
+
+      - name: Stop containers
+        if: always()
+        run: docker compose -f deployment/compose.yml down --remove-orphans
