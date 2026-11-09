@@ -1,4 +1,14 @@
-/** Formats image metadata for display. */
+/** Formats analysis data for display. */
+import type { Finding } from '@composelens/shared';
+
+/** Use only the findings in the current image scope and filters. */
+export function formatMaxCvssScore(findings: readonly Pick<Finding, 'score'>[]): string {
+  const score = findings.reduce<number | null>((highest, finding) => (
+    finding.score !== null && (highest === null || finding.score > highest) ? finding.score : highest
+  ), null);
+  return score === null ? '미제공' : score.toFixed(1);
+}
+
 export function shortDigest(digest: string) {
   return `${digest.slice(0, 19)}…`;
 }

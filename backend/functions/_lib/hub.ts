@@ -1,4 +1,5 @@
 import type { ImageMetadata, ParsedImageReference, TagPage } from '@composelens/shared';
+import { matchesTagFamily } from '@composelens/shared/tag-family';
 import { ApiError } from './http';
 import { findPlatform, isDigest, platformName, type ImagePlatform } from './platform';
 import { requestJson } from './upstream';
@@ -66,17 +67,18 @@ export async function readTagMetadata(reference: ParsedImageReference, requested
   };
 }
 
-export async function listTags(repository: string, page: number, search: string): Promise<TagPage> {
+export async function listTags(repository: string, page: number, search: string, family = ''): Promise<TagPage> {
   const url = hubRepositoryEndpoint(repository);
   url.searchParams.set('page', String(page));
   url.searchParams.set('page_size', '50');
-  if (search) url.searchParams.set('name', search);
+  if (family || search) url.searchParams.set('name', family || search);
 
   const data = await requestJson<HubTagList>(url, { label: 'Docker Hub 태그 목록' });
   if (!Array.isArray(data.results)) throw new ApiError('Docker Hub 태그 목록 응답 형식이 변경되었습니다.');
 
   return {
-    tags: data.results.filter((tag) => typeof tag.name === 'string').map((tag) => ({
+    tags: data.results.filter((tag) => typeof tag.name === 'string'
+      && (!family || (matchesTagFamily(tag.name, family) && tag.name.toLowerCase().includes(search.toLowerCase())))).map((tag) => ({
       name: tag.name,
       digest: isDigest(tag.digest) ? tag.digest : '',
       updatedAt: tag.tag_last_pushed ?? tag.last_updated ?? null,

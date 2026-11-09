@@ -3,13 +3,22 @@ import { ApiError } from './http';
 const REQUEST_TIMEOUT_MS = 15_000;
 const MAX_RESPONSE_LENGTH = 10 * 1024 * 1024;
 
-interface JsonRequestOptions {
+interface RequestOptions {
   label: string;
   method?: 'GET' | 'POST';
   body?: unknown;
 }
 
-export async function requestJson<T>(url: URL | string, options: JsonRequestOptions): Promise<T> {
+export async function requestJson<T>(url: URL | string, options: RequestOptions): Promise<T> {
+  const text = await requestText(url, options);
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new ApiError(`${options.label}에서 올바른 JSON 응답을 받지 못했습니다.`);
+  }
+}
+
+export async function requestText(url: URL | string, options: RequestOptions): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -32,11 +41,7 @@ export async function requestJson<T>(url: URL | string, options: JsonRequestOpti
       throw new ApiError(`${options.label} 응답이 너무 큽니다. 다른 이미지 버전을 선택해 주세요.`);
     }
 
-    try {
-      return JSON.parse(text) as T;
-    } catch {
-      throw new ApiError(`${options.label}에서 올바른 JSON 응답을 받지 못했습니다.`);
-    }
+    return text;
   } catch (error) {
     if (error instanceof ApiError) throw error;
     if (controller.signal.aborted) {
@@ -50,7 +55,7 @@ export async function requestJson<T>(url: URL | string, options: JsonRequestOpti
 
 function upstreamError(response: Response, label: string): ApiError {
   if (response.status === 404) return new ApiError(`${label}에서 해당 이미지나 태그를 찾지 못했습니다.`, 404);
-  if (response.status === 429) {
+  if (response.status === 429 || (response.status === 403 && response.headers.get('x-ratelimit-remaining') === '0')) {
     return new ApiError(
       `${label}의 요청 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.`,
       429,

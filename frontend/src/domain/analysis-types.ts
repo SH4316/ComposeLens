@@ -1,5 +1,5 @@
 /** Frontend models for Compose inputs, image analysis and CVE relationships. */
-import type { Finding, ImageReport, Severity } from '@composelens/shared';
+import type { Finding, HistoricalImage, ImageReport, Severity } from '@composelens/shared';
 
 export interface BuildSpec {
   context: string;
@@ -40,6 +40,7 @@ export interface ImageState {
   report: ImageReport | null;
   status: 'idle' | 'loading' | 'done' | 'error';
   error: string | null;
+  history?: HistoricalImage;
 }
 
 export interface LinkedFinding extends Finding {

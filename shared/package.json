@@ -6,7 +6,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./types.ts",
-    "./image-reference": "./image-reference.ts"
+    "./image-reference": "./image-reference.ts",
+    "./tag-family": "./tag-family.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

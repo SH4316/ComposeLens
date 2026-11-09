@@ -53,3 +53,21 @@ export interface TagPage {
   tags: TagOption[];
   nextPage: number | null;
 }
+
+/** A public observation of a tag, rather than its exact push time. */
+export interface HistoricalImage {
+  sourceReference: string;
+  digest: string;
+  indexDigest: string;
+  platform: string;
+  recordedAt: string;
+  sourceUrl: string;
+  version: string | null;
+}
+
+export interface TagHistoryPage {
+  status: 'available' | 'unsupported';
+  entries: HistoricalImage[];
+  nextPage: number | null;
+  message?: string;
+}

@@ -30,7 +30,9 @@
 - 상단에 전체 이미지 중 분석 정보가 제공된 수와 확인이 필요한 수를 표시합니다. 이미지별 전체 CVE와 필터 적용 후 표시되는 CVE 수도 구분합니다.
 - 테마는 처음에 시스템 설정을 따르며 라이트·다크 모드로 전환할 수 있습니다.
 
-과거 버전 선택은 현재 조회 가능한 태그·digest의 분석을 가져오는 기능입니다. 과거 `latest`의 실제 대상이나 당시 알려졌던 취약점 상태를 복원하지는 않습니다.
+버전 선택 창 상단에는 Docker 공식 이미지의 공개 기록에서 관측된 과거 이미지를 표시합니다. `docker-library/repo-info`의 태그별 Git 이력에서 선택한 플랫폼의 digest를 조회하며, 각 항목에 기록 시점과 출처를 제공합니다. 선택 후에도 이미지 행에 **과거 기록** 표시를 유지합니다. 기록 시점은 실제 태그 변경 시각과 다를 수 있고 중간 변경이 누락될 수 있습니다. 과거 이미지의 취약점도 현재 제공되는 분석을 조회합니다.
+
+현재 태그 목록은 `python:3.11`처럼 숫자 버전이 있으면 같은 major·minor 계열을 기본으로 표시합니다. `slim`·`alpine` 등 변형을 포함하며 전체 태그로 전환할 수 있습니다. 같은 계열이라는 분류 자체는 과거에 해당 태그가 가리켰다는 증거가 아닙니다.
 
 분석을 실행하면 주소의 `url`과 `compose` 쿼리 파라미터에 저장소 URL과 파일 경로가 기록됩니다. 주소를 공유하거나 새로고침하면 같은 입력으로 분석을 시작합니다. `compose`가 없으면 `compose.yml`을 사용합니다.
 
@@ -54,7 +56,8 @@ Docker Compose로 실행할 때는 Nginx가 React 빌드 파일을 제공하고 
 | API | 입력 | 응답 |
 | --- | --- | --- |
 | `GET /api/images` | `reference`, `platform` | 이미지 메타데이터, 패키지별 취약점, 조회 상태·시각 |
-| `GET /api/tags` | `repository`, `page`, `search` | 선택할 수 있는 태그와 다음 페이지 |
+| `GET /api/tags` | `repository`, `page`, `search`, 선택적 `family` | 선택할 수 있는 태그와 다음 페이지 |
+| `GET /api/tag-history` | `reference`, `platform`, `page` | 공식 이미지의 과거 관측 digest·기록 시점·출처와 다음 페이지 |
 
 브라우저에 넣을 비밀키나 Docker 계정은 필요하지 않습니다. 별도 이미지 스캔·DB 없이 익명으로 제공되는 기존 분석 정보를 사용합니다.
 
@@ -103,6 +106,7 @@ shared/
   image-reference.ts # 공통 이미지 참조 해석
 deployment/
   compose.yml        # Nginx + Node 백엔드 실행
+  .env.example       # 로컬 포트와 선택적 Cloudflare Tunnel 설정
   smoke-test.sh      # 정적 파일·API 라우팅 검사
 ```
 

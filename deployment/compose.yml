@@ -47,6 +47,25 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  cloudflared:
+    image: ${CLOUDFLARED_IMAGE:-cloudflare/cloudflared:2026.10.7@sha256:4955524aeaa379e154023d5a027c250f7b35041a2e7e950cf13f144bc9b9c5ba}
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    deploy:
+      replicas: ${CLOUDFLARE_TUNNEL_REPLICAS:-0}
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - app
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
 networks:
   app:
     driver: bridge

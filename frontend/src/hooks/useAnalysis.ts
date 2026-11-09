@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { HistoricalImage } from '@composelens/shared';
 import { parseCompose } from '../domain/compose-parser';
 import type { ImageSpec, ImageState, RepositoryFile } from '../domain/analysis-types';
 import { fetchImageReport } from '../services/image-api-client';
@@ -45,7 +46,8 @@ export function useAnalysis() {
 
   useEffect(() => cancel, [cancel]);
 
-  const loadImage = useCallback(async (image: ImageState, currentGeneration: number, reference = image.selectedRef) => {
+  const loadImage = useCallback(async (image: ImageState, currentGeneration: number, reference = image.selectedRef,
+    history = reference === image.selectedRef ? image.history : undefined) => {
     const id = image.spec.id;
     imageControllers.current.get(id)?.abort();
     const controller = new AbortController();
@@ -59,7 +61,7 @@ export function useAnalysis() {
       }));
     };
 
-    update({ selectedRef: reference, status: 'loading', report: null, error: null });
+    update({ selectedRef: reference, history, status: 'loading', report: null, error: null });
     try {
       const report = await fetchImageReport(reference, image.spec.platform, controller.signal);
       update({ report, status: 'done' });
@@ -103,8 +105,8 @@ export function useAnalysis() {
     }
   }, [cancel, loadImage]);
 
-  const changeReference = useCallback((image: ImageState, reference: string) => {
-    void loadImage(image, generation.current, reference);
+  const changeReference = useCallback((image: ImageState, reference: string, history?: HistoricalImage) => {
+    void loadImage(image, generation.current, reference, history);
   }, [loadImage]);
 
   const retryImage = useCallback((image: ImageState) => {

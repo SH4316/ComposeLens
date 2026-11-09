@@ -46,6 +46,14 @@ afterEach(async () => {
 });
 
 describe('Node HTTP API', () => {
+  it('routes tag history through the same handler as Pages', async () => {
+    fetchMock.mockResolvedValueOnce(Response.json([]));
+    const response = await request('/api/tag-history?reference=python%3A3.11&platform=linux%2Farm64');
+    expect(response.status).toBe(200);
+    expect(JSON.parse(response.body)).toEqual({ status: 'available', entries: [], nextPage: null });
+    expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('path')).toBe('repos/python/remote/3.11.md');
+  });
+
   it('serves a local health check without contacting providers', async () => {
     const response = await request('/healthz');
 

@@ -1,5 +1,5 @@
 /** Fetches image reports and tags through the application API. */
-import type { ImageReport, TagPage } from '@composelens/shared';
+import type { ImageReport, TagHistoryPage, TagPage } from '@composelens/shared';
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(path, { signal });
@@ -24,7 +24,13 @@ export function fetchImageReport(reference: string, platform: string, signal?: A
   return getJson<ImageReport>(`/api/images?${query}`, signal);
 }
 
-export function fetchTags(repository: string, search: string, page: number, signal?: AbortSignal) {
+export function fetchTags(repository: string, search: string, page: number, signal?: AbortSignal, family = '') {
   const query = new URLSearchParams({ repository, search, page: String(page) });
+  if (family) query.set('family', family);
   return getJson<TagPage>(`/api/tags?${query}`, signal);
+}
+
+export function fetchTagHistory(reference: string, platform: string, page: number, signal?: AbortSignal) {
+  const query = new URLSearchParams({ reference, platform, page: String(page) });
+  return getJson<TagHistoryPage>(`/api/tag-history?${query}`, signal);
 }

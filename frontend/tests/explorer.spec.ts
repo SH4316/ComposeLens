@@ -29,6 +29,7 @@ function report(reference: string, findings: Finding[]): ImageReport {
 }
 
 async function mockSources(page: Page, many = false) {
+  await page.route('**/api/tag-history?**', (route) => route.fulfill({ json: { status: 'available', entries: [], nextPage: null } }));
   await page.route('https://api.github.com/repos/example/stack**', (route) => {
     const file = new URL(route.request().url()).pathname.includes('/contents/');
     return route.fulfill({ json: file
@@ -50,6 +51,7 @@ async function mockSources(page: Page, many = false) {
 }
 
 async function mockProjectFiles(page: Page, files: Record<string, string>, findingsByReference: Record<string, Finding[]>, entries: Record<string, unknown> = {}) {
+  await page.route('**/api/tag-history?**', (route) => route.fulfill({ json: { status: 'available', entries: [], nextPage: null } }));
   const requests = { images: [] as string[], files: [] as string[], repositories: 0 };
   await page.route('https://api.github.com/repos/example/stack**', (route) => {
     const pathname = new URL(route.request().url()).pathname;
@@ -168,6 +170,50 @@ test('scopes CVEs and details to an image while retaining the image inventory, t
   await expect(redis).toHaveAttribute('aria-pressed', 'false');
   await expect(page.locator('.inspection-summary')).toContainText('전체 이미지의 취약점');
   expect(errors).toEqual([]);
+});
+
+test('shows CVSS scores per CVE, preserves zero and missing scores, and recomputes the maximum for image scope and filters', async ({ page }) => {
+  const shared = finding('CVE-2025-0001', 'HIGH', 'openssl', '3.0.17');
+  const missing = { ...finding('CVE-2025-0002', 'LOW', 'expat', null), score: null };
+  const zero = { ...finding('CVE-2025-0003', 'LOW', 'curl', null), score: 0 };
+  await mockProjectFiles(page, { 'compose.yml': COMPOSE }, {
+    'nginx:latest': [shared, { ...shared, id: 'other-package', packageName: 'libssl', score: 8.1, fixedVersion: null }, missing, zero],
+    'redis:7.4': [{ ...shared, severity: 'CRITICAL', score: 10, fixedVersion: null }],
+  });
+  await analyze(page);
+
+  const row = page.getByRole('button', { name: 'CVE-2025-0001 상세 보기', exact: true });
+  const missingRow = page.getByRole('button', { name: 'CVE-2025-0002 상세 보기', exact: true });
+  const zeroRow = page.getByRole('button', { name: 'CVE-2025-0003 상세 보기', exact: true });
+  const drawer = page.getByRole('dialog');
+  await expect(row.locator('.cvss-score')).toHaveText('CVSS 10.0');
+  await expect(missingRow.locator('.cvss-score')).toHaveText('CVSS 미제공');
+  await expect(zeroRow.locator('.cvss-score')).toHaveText('CVSS 0.0');
+  await row.click();
+  await expect(drawer.locator('.detail-summary')).toContainText('최대 CVSS 10.0');
+  await page.keyboard.press('Escape');
+
+  await missingRow.click();
+  await expect(drawer.locator('.detail-summary')).toContainText('CVSS 미제공');
+  await page.keyboard.press('Escape');
+  await zeroRow.click();
+  await expect(drawer.locator('.detail-summary')).toContainText('최대 CVSS 0.0');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'nginx:latest 이미지 관계 선택', exact: true }).click();
+  await expect(row.locator('.cvss-score')).toHaveText('CVSS 8.1');
+  await row.click();
+  await expect(drawer.locator('.detail-summary')).toContainText('최대 CVSS 8.1');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('combobox').selectOption('available');
+  await expect(row.locator('.cvss-score')).toHaveText('CVSS 7.5');
+  await row.click();
+  await expect(drawer.locator('.detail-summary')).toContainText('최대 CVSS 7.5');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: '초기화', exact: true }).click();
+  await page.getByRole('button', { name: '전체 보기', exact: true }).click();
+  await expect(row.locator('.cvss-score')).toHaveText('CVSS 10.0');
 });
 
 test('applies severity and search filters to the inventory while keeping the image scope on the right', async ({ page }) => {

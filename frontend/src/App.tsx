@@ -147,7 +147,7 @@ export function App() {
         <HelpTip label="데이터 안내" placement="top">
           공개 GitHub 저장소와 Docker Hub·Scout의 기존 분석을 조회합니다.
           분석 미제공·조회 실패는 취약점 0건을 의미하지 않습니다.
-          태그는 현재 digest 기준이며 과거 latest 상태를 복원하지 않습니다.
+          태그는 현재 digest 기준이며, 과거 기록은 관측된 digest로 조회합니다. 취약점은 현재 제공되는 분석입니다.
           점선은 버전 미고정·베이스 기준 연결입니다. 취약점 심각도와 별개입니다.
           {screen === 'results' && lastRetrieved && <><br />조회 {formatDate(lastRetrieved)}</>}
         </HelpTip>
@@ -157,8 +157,8 @@ export function App() {
       </div>
     </footer>
     {screen === 'results' && selectedVulnerability && <VulnerabilityDetail vulnerability={selectedVulnerability} onClose={() => setOpenCveId(null)} />}
-    {screen === 'results' && versionImage && <VersionPicker image={versionImage} onClose={() => setVersionImage(null)} onApply={(reference) => {
-      analysis.changeReference(versionImage, reference);
+    {screen === 'results' && versionImage && <VersionPicker image={versionImage} onClose={() => setVersionImage(null)} onApply={(reference, history) => {
+      analysis.changeReference(versionImage, reference, history);
       select({ kind: 'image', id: versionImage.spec.id });
       setVersionImage(null);
     }} />}

@@ -8,7 +8,7 @@ base_url="http://127.0.0.1:$test_port"
 
 # Use a separate project so the check never stops the main application stack.
 compose() {
-    PORT="$test_port" docker compose --project-name "$project_name" \
+    PORT="$test_port" CLOUDFLARE_TUNNEL_REPLICAS=0 docker compose --project-name "$project_name" \
         -f "$script_dir/compose.yml" "$@"
 }
 

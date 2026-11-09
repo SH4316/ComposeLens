@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { onRequestGet as getImages, onRequest as rejectImageMethod } from './images';
 import { onRequestGet as getTags } from './tags';
+import { onRequestGet as getTagHistory } from './tag-history';
 
 function context(url: string): Parameters<PagesFunction>[0] {
   return { request: new Request(url) } as Parameters<PagesFunction>[0];
@@ -9,6 +10,25 @@ function context(url: string): Parameters<PagesFunction>[0] {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('Pages API routes', () => {
+  it('returns unsupported history without fetching non-official images', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const response = await getTagHistory(context('https://example.com/api/tag-history?reference=example/python:3.11'));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ status: 'unsupported', entries: [] });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('restricts family results at numeric boundaries and keeps next pages reachable', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ next: 'https://hub.docker.com/next', results:
+      ['3.11.9', '3.11.10-slim', '3.11-alpine', '3.110', '3.14', '13.11'].map((name) => ({ name })),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const response = await getTags(context('https://example.com/api/tags?repository=library/python&family=3.11&search=slim'));
+    expect(await response.json()).toEqual({ nextPage: 2, tags: [{ name: '3.11.10-slim', digest: '', updatedAt: null }] });
+    expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('name')).toBe('3.11');
+  });
+
   it('requires an image reference', async () => {
     const response = await getImages(context('https://example.com/api/images'));
 

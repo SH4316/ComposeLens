@@ -1,4 +1,4 @@
-import { Box, Check, ChevronDown, CircleAlert, Link2, LoaderCircle, RotateCcw } from 'lucide-react';
+import { Box, Check, ChevronDown, CircleAlert, History, Link2, LoaderCircle, RotateCcw } from 'lucide-react';
 import { formatBytes, shortDigest } from '../domain/display-formatters';
 import { parseImageReference } from '@composelens/shared/image-reference';
 import type { ImageState } from '../domain/analysis-types';
@@ -42,6 +42,7 @@ export function ImageRow({ image, selected, related, findingCount, totalFindingC
       <div className="image-services" title={spec.services.join(', ')}>{spec.services.join(' · ')}<span className="inline-separator">/</span>{spec.platform}</div>
       <div className="image-evidence">
         {spec.origin && <span className="confidence-badge" title="Dockerfile의 베이스 이미지 분석입니다. 최종 빌드 이미지의 패키지 변경은 반영하지 않습니다.">베이스 기준</span>}
+        {image.history && <span className="confidence-badge" title={`${image.history.sourceReference}의 공개 기록 · ${image.history.recordedAt}`}><History size={12} />과거 기록</span>}
         <span className={`confidence-badge${unpinned ? '' : ' pinned'}`} title={unpinned
           ? '태그가 가리키는 이미지는 바뀔 수 있습니다. 아래 digest는 현재 조회한 이미지입니다.'
           : '지정한 digest의 이미지를 조회합니다.'}><Link2 size={12} />{unpinned ? '태그 미고정' : 'digest 고정'}</span>

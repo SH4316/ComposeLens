@@ -41,6 +41,35 @@ sh deployment/smoke-test.sh http://localhost:9090
 docker compose -f deployment/compose.yml down
 ```
 
+### Cloudflare Tunnel (선택)
+
+기존 Nginx를 Cloudflare Tunnel로 공개하려면 저장소 루트에서 예제 파일을 복사합니다.
+
+```bash
+cp deployment/.env.example deployment/.env
+```
+
+Cloudflare 대시보드에서 원격 관리 Tunnel을 만들고 발급받은 토큰을 `deployment/.env`의 `CLOUDFLARE_TUNNEL_TOKEN`에 넣습니다. 공개 호스트명에 연결할 서비스는 **HTTP · `web:8080`** (`http://web:8080`)으로 지정합니다. `localhost` 대신 같은 Compose 네트워크의 Nginx 서비스 이름을 사용합니다. [Tunnel 설정 안내](https://developers.cloudflare.com/tunnel/get-started/)
+
+토큰은 **Tunnels → 해당 Tunnel → Add a replica**의 커넥터 설치 명령에서 `--token` 뒤에 있는 긴 `eyJ...` 문자열입니다. 명령 전체, Tunnel ID(UUID), Cloudflare 계정의 API 토큰을 입력하면 `Provided Tunnel token is not valid.` 오류가 발생합니다. [Tunnel 토큰 가져오기](https://developers.cloudflare.com/tunnel/reference/tunnel-tokens/)
+
+```bash
+docker compose -f deployment/compose.yml up --build -d
+docker compose -f deployment/compose.yml logs -f cloudflared
+```
+
+토큰을 수정한 뒤에는 `docker compose -f deployment/compose.yml up -d --force-recreate cloudflared`로 커넥터를 재생성하면 됩니다. `restart`만 실행하면 기존 컨테이너의 환경변수는 바뀌지 않습니다.
+
+Compose는 `deployment/.env`를 자동으로 읽습니다. 토큰이 있으면 예제의 `CLOUDFLARE_TUNNEL_REPLICAS` 표현식이 `1`로 평가되어 커넥터를 실행합니다. `.env`가 없거나 토큰이 비어 있으면 `0`으로 설정되어 Tunnel 컨테이너를 생성하지 않습니다. [Compose 환경변수 보간](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
+
+Tunnel을 끄려면 토큰을 비우고 같은 `up --build -d` 명령을 다시 실행합니다. 기존 커넥터도 0개로 줄어들어 종료됩니다. `.env`는 Git과 Docker 빌드 컨텍스트에서 제외되며, 토큰은 커넥터 컨테이너에만 전달합니다. 별도 환경변수로 `CLOUDFLARE_TUNNEL_REPLICAS`를 고정했다면 자동 설정보다 우선합니다.
+
+```text
+브라우저 → Cloudflare Tunnel → cloudflared → web:8080 → backend:3000
+```
+
+Tunnel은 앱으로 들어오는 연결을 처리합니다. Docker Hub·Scout 조회는 이 Compose 백엔드가 실행되는 서버에서 나갑니다. 커넥터 이미지는 공식 `cloudflare/cloudflared:2026.10.7`의 amd64·arm64 digest로 고정했습니다. [cloudflared 릴리스](https://github.com/cloudflare/cloudflared/releases/tag/2026.10.7)
+
 ### 베이스 이미지
 
 2026-11-02 기준 최신 정식 Node.js `26.13.0`과 최신 Nginx mainline `1.31.8`의 공식 이미지 변형을 비교했습니다. Docker Hub 태그와 OCI manifest를 대조해 digest를 고정했으며, 두 이미지 모두 amd64·arm64를 지원합니다. [Node 공식 이미지](https://hub.docker.com/_/node), [Nginx 공식 이미지](https://hub.docker.com/_/nginx)
